@@ -1,17 +1,17 @@
 // prerequisites: a nodejs app must be deployed inside a kubernetes cluster
 // TODO: look for all instances of [] and replace all instances of 
 //       '[VARIABLE]' with actual values 
-//        e.g [GITREPO] might become https://github.com/MyName/external.git
+//        e.g https://github.com/RatnajitDesai/web-server.git might become https://github.com/MyName/external.git
 // variables:
-//      [GITREPO]
-//      [GIT BRANCH]
-//      [PROJECTID]
-//      [APPNAME]
-//      [CLUSTER_NAME] 
-//      [ZONE]
+//      https://github.com/RatnajitDesai/web-server.git
+//      main
+//      dtc-nov21-user318
+//      web-server-image
+//      cluster-1
+//      us-central1-c
 //      the following values can be found in the yaml:
-//      [DEPLOYMENT_NAME]
-//      [CONTAINER_NAME] (name of the container to be replaced - in the template/spec section of the deployment)
+//      demo-ui
+//      demo-ui (name of the container to be replaced - in the template/spec section of the deployment)
 
 
 pipeline {
@@ -26,8 +26,8 @@ pipeline {
             }
             steps {
                 echo 'Retrieving source from github' 
-                git branch: '[GIT BRANCH]',
-                    url: '[GITREPO]'
+                git branch: 'main',
+                    url: 'https://github.com/RatnajitDesai/web-server.git'
                 echo 'Did we get the source?' 
                 sh 'ls -a'
             }
@@ -68,12 +68,12 @@ pipeline {
                         }
                     }
             steps {
-                echo "submit gcr.io/[PROJECTID]/[APPNAME]:v2.${env.BUILD_ID}"
-                sh "gcloud builds submit -t gcr.io/[PROJECTID]/[APPNAME]:v2.${env.BUILD_ID} ."
+                echo "submit gcr.io/dtc-nov21-user318/web-server-image:v2.${env.BUILD_ID}"
+                sh "gcloud builds submit -t gcr.io/dtc-nov21-user318/web-server-image:v2.${env.BUILD_ID} ."
                 echo 'Get cluster credentials'
-                sh 'gcloud container clusters get-credentials [CLUSTER_NAME] --zone [ZONE] --project [PROJECTID]'
-                echo "Update the image to use gcr.io/[PROJECTID]/[APPNAME]:v2.${env.BUILD_ID}"
-                sh "kubectl set image deployment/[DEPLOYMENT_NAME] [CONTAINER_NAME]=gcr.io/[PROJECTID]/[APPNAME]:v2.${env.BUILD_ID} --record"
+                sh 'gcloud container clusters get-credentials cluster-1 --zone us-central1-c --project dtc-nov21-user318'
+                echo "Update the image to use gcr.io/dtc-nov21-user318/web-server-image:v2.${env.BUILD_ID}"
+                sh "kubectl set image deployment/demo-ui demo-ui=gcr.io/dtc-nov21-user318/web-server-image:v2.${env.BUILD_ID} --record"
             }
         }            
     }
